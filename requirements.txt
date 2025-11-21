@@ -1,0 +1,21 @@
+# 大数据开发实习岗位分析平台 - 依赖库
+# Python 版本要求: Python 3.8+
+
+# Web 应用框架
+streamlit>=1.28.0
+
+# 数据处理
+pandas>=2.0.0
+numpy>=1.24.0
+
+# 数据可视化
+plotly>=5.17.0
+matplotlib>=3.7.0
+
+# 词云生成
+wordcloud>=1.9.2
+
+# 注意：以下是 Python 标准库，无需安装
+# - re (正则表达式)
+# - collections (Counter)
+# - datetime (日期时间)
