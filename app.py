@@ -49,15 +49,32 @@ st.markdown("""
 @st.cache_data
 def load_and_clean_data():
     """加载并清洗数据"""
-    try:
-        for encoding in ['utf-8', 'gbk', 'gb18030']:
+    df = None
+    
+    # 尝试多个可能的文件路径
+    possible_paths = [
+        '../Big_data_development_results.csv',  # 本地开发环境
+        'Big_data_development_results.csv',     # Streamlit Cloud
+        './Big_data_development_results.csv'    # 当前目录
+    ]
+    
+    # 尝试多种编码和路径读取CSV文件
+    for file_path in possible_paths:
+        for encoding in ['utf-8', 'gbk', 'gb18030', 'utf-8-sig']:
             try:
-                df = pd.read_csv('../Big_data_development_results.csv', encoding=encoding)
+                df = pd.read_csv(file_path, encoding=encoding)
                 break
-            except:
+            except FileNotFoundError:
                 continue
-    except:
-        st.error("❌ 无法读取数据文件")
+            except Exception as e:
+                continue
+        if df is not None:
+            break
+    
+    # 如果所有编码和路径都失败
+    if df is None:
+        st.error("❌ 无法读取数据文件：Big_data_development_results.csv")
+        st.info("💡 请确保数据文件在项目根目录或上级目录中")
         return None
     
     expected_cols = ['职位id', '职位标题', '薪资范围', '公司名称', '工作地点', 
