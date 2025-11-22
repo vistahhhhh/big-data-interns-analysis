@@ -373,13 +373,13 @@ def filter_data(df, cities, education, duration, salary_range, required_skills, 
     if welfare_prefs and len(welfare_prefs) > 0:
         # 检查 welfare_tags 列是否存在
         if 'welfare_tags' in filtered_df.columns:
-            def has_all_welfare(welfare_list):
+            def has_any_welfare(welfare_list):
                 # 确保 welfare_list 是列表类型
                 if not isinstance(welfare_list, list):
                     return False
-                # 改为交集：必须包含所有指定的福利标签
-                return all(welfare in welfare_list for welfare in welfare_prefs)
-            filtered_df = filtered_df[filtered_df['welfare_tags'].apply(has_all_welfare)]
+                # 并集：只要包含任意一个指定的福利标签即可
+                return any(welfare in welfare_list for welfare in welfare_prefs)
+            filtered_df = filtered_df[filtered_df['welfare_tags'].apply(has_any_welfare)]
         else:
             st.warning("⚠️ 数据中缺少福利标签信息，无法按福利筛选")
     
@@ -427,8 +427,8 @@ def main():
         
         if all_welfare:
             st.sidebar.markdown("---")
-            st.sidebar.subheader("🎁 福利偏好（交集匹配）")
-            st.sidebar.caption("💡 输入多个关键词时，将筛选同时满足所有条件的岗位")
+            st.sidebar.subheader("🎁 福利偏好（并集匹配）")
+            st.sidebar.caption("💡 输入多个关键词时，将筛选满足任意一个条件的岗位")
             
             # 显示福利待遇示例
             with st.sidebar.expander("📋 常见福利待遇示例", expanded=False):
@@ -496,7 +496,7 @@ def main():
                 
                 if selected_welfare:
                     st.sidebar.success(f"✅ 共匹配到 {len(selected_welfare)} 个福利标签")
-                    st.sidebar.warning("⚠️ 筛选模式：必须同时满足所有输入的关键词")
+                    st.sidebar.info("ℹ️ 筛选模式：满足任意一个福利条件即可")
                 else:
                     st.sidebar.warning("⚠️ 未匹配到相关福利")
                     with st.sidebar.expander("💡 可用福利示例"):
