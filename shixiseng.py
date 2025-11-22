@@ -143,7 +143,13 @@ def load_and_clean_data(file_path):
                         standardized_tags.append(mapped_tag)
             return standardized_tags
         
-        df['welfare_tags'] = df['福利待遇'].apply(extract_welfare_tags)
+        # 检查福利待遇列是否存在
+        if '福利待遇' in df.columns:
+            df['welfare_tags'] = df['福利待遇'].apply(extract_welfare_tags)
+        else:
+            st.warning("⚠️ 数据中没有'福利待遇'列，将创建空的福利标签")
+            df['welfare_tags'] = [[] for _ in range(len(df))]
+        
         df['截止日期'] = pd.to_datetime(df['截止日期'], errors='coerce')
         
         return df
@@ -153,6 +159,9 @@ def load_and_clean_data(file_path):
         st.stop()
     except Exception as e:
         st.error(f"❌ 数据加载失败: {str(e)}")
+        st.error(f"错误详情: {type(e).__name__}")
+        import traceback
+        st.error(f"堆栈跟踪:\n{traceback.format_exc()}")
         st.stop()
 
 
@@ -189,9 +198,16 @@ def filter_data(df, cities, education, duration, salary_range, required_skills, 
         filtered_df = filtered_df[filtered_df['matched_skills'].apply(has_required_skills)]
     
     if welfare_prefs and len(welfare_prefs) > 0:
-        def has_welfare(welfare_list):
-            return any(welfare in welfare_list for welfare in welfare_prefs)
-        filtered_df = filtered_df[filtered_df['welfare_tags'].apply(has_welfare)]
+        # 检查 welfare_tags 列是否存在
+        if 'welfare_tags' in filtered_df.columns:
+            def has_welfare(welfare_list):
+                # 确保 welfare_list 是列表类型
+                if not isinstance(welfare_list, list):
+                    return False
+                return any(welfare in welfare_list for welfare in welfare_prefs)
+            filtered_df = filtered_df[filtered_df['welfare_tags'].apply(has_welfare)]
+        else:
+            st.warning("⚠️ 数据中缺少福利标签信息，无法按福利筛选")
     
     return filtered_df
 
@@ -223,8 +239,48 @@ def main():
     all_skills = sorted(list(set([skill for skills in df['matched_skills'] for skill in skills])))
     selected_skills = st.sidebar.multiselect("必备技能", options=all_skills, default=[])
     
-    all_welfare = sorted(list(set([tag for tags in df['welfare_tags'] for tag in tags])))
-    selected_welfare = st.sidebar.multiselect("福利偏好", options=all_welfare, default=[])
+    # 福利偏好 - 文字输入智能匹配
+    selected_welfare = []
+    
+    # 检查是否有福利标签数据
+    if 'welfare_tags' in df.columns:
+        try:
+            all_welfare = sorted(list(set([tag for tags in df['welfare_tags'] if isinstance(tags, list) for tag in tags])))
+        except:
+            all_welfare = []
+        
+        if all_welfare:
+            st.sidebar.markdown("---")
+            st.sidebar.subheader("🎁 福利偏好（智能匹配）")
+            welfare_input = st.sidebar.text_input(
+                "输入福利关键词",
+                placeholder="例如：转正、餐补、双休...",
+                help="输入关键词，系统会自动匹配相关福利"
+            )
+            
+            # 智能匹配福利标签
+            if welfare_input:
+                welfare_keywords = [kw.strip() for kw in welfare_input.split() if kw.strip()]
+                for keyword in welfare_keywords:
+                    for welfare in all_welfare:
+                        if keyword.lower() in welfare.lower() or welfare.lower() in keyword.lower():
+                            if welfare not in selected_welfare:
+                                selected_welfare.append(welfare)
+                
+                # 显示匹配结果
+                if selected_welfare:
+                    st.sidebar.success(f"✅ 匹配到 {len(selected_welfare)} 个福利标签")
+                    st.sidebar.write("匹配结果：")
+                    for welfare in selected_welfare:
+                        st.sidebar.write(f"• {welfare}")
+                else:
+                    st.sidebar.warning("⚠️ 未匹配到相关福利，请尝试其他关键词")
+                    if all_welfare:
+                        st.sidebar.info(f"💡 可用福利：{', '.join(all_welfare[:5])}...")
+        else:
+            st.sidebar.info("ℹ️ 当前数据中没有福利标签信息")
+    else:
+        st.sidebar.info("ℹ️ 数据中缺少福利标签列")
     
     filtered_df = filter_data(df, selected_cities, selected_education, selected_duration, 
                              salary_range, selected_skills, selected_welfare)
