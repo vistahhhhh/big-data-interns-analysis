@@ -22,6 +22,179 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ==================== 自定义CSS样式 ====================
+st.markdown("""
+<style>
+    /* 主标题样式 */
+    .main-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(120deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+        padding: 1rem 0;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* 副标题样式 */
+    .subtitle {
+        text-align: center;
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+    
+    /* 指标卡片样式优化 */
+    div[data-testid="metric-container"] {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1.2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    div[data-testid="metric-container"]:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    div[data-testid="metric-container"] label {
+        color: white !important;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    
+    div[data-testid="metric-container"] [data-testid="stMetricValue"] {
+        color: white !important;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+    
+    div[data-testid="metric-container"] [data-testid="stMetricDelta"] {
+        color: rgba(255, 255, 255, 0.9) !important;
+    }
+    
+    /* 侧边栏样式 */
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    section[data-testid="stSidebar"] > div {
+        padding-top: 2rem;
+    }
+    
+    /* 标签页样式 */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background-color: #f8f9fa;
+        padding: 0.5rem;
+        border-radius: 10px;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        height: 50px;
+        border-radius: 8px;
+        padding: 0 24px;
+        font-weight: 600;
+        background-color: white;
+        border: 2px solid transparent;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(120deg, #667eea 0%, #764ba2 100%);
+        color: white !important;
+        border-color: #667eea;
+    }
+    
+    /* 按钮样式 */
+    .stButton > button {
+        background: linear-gradient(120deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    
+    /* 下载按钮特殊样式 */
+    .stDownloadButton > button {
+        background: linear-gradient(120deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+    
+    /* 输入框样式 */
+    .stTextInput > div > div > input {
+        border-radius: 8px;
+        border: 2px solid #e9ecef;
+        transition: border-color 0.3s ease;
+    }
+    
+    .stTextInput > div > div > input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    /* 选择框样式 */
+    .stSelectbox > div > div {
+        border-radius: 8px;
+    }
+    
+    /* 滑块样式 */
+    .stSlider > div > div > div {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    /* 去除滑块下方固定的最小值和最大值标签的底色 */
+    .stSlider [data-testid="stTickBar"] > div {
+        background: transparent !important;
+    }
+    
+    .stSlider [data-testid="stTickBarMin"],
+    .stSlider [data-testid="stTickBarMax"] {
+        background: transparent !important;
+    }
+    
+    /* 数据表格样式 */
+    .dataframe {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    /* 图表容器样式 */
+    .plot-container {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+    }
+    
+    /* 信息提示框样式 */
+    .stAlert {
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+    }
+    
+    /* 分隔线样式 */
+    hr {
+        margin: 2rem 0;
+        border: none;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #667eea, transparent);
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # ==================== 数据加载与清洗 ====================
 
 @st.cache_data
@@ -200,12 +373,13 @@ def filter_data(df, cities, education, duration, salary_range, required_skills, 
     if welfare_prefs and len(welfare_prefs) > 0:
         # 检查 welfare_tags 列是否存在
         if 'welfare_tags' in filtered_df.columns:
-            def has_welfare(welfare_list):
+            def has_all_welfare(welfare_list):
                 # 确保 welfare_list 是列表类型
                 if not isinstance(welfare_list, list):
                     return False
-                return any(welfare in welfare_list for welfare in welfare_prefs)
-            filtered_df = filtered_df[filtered_df['welfare_tags'].apply(has_welfare)]
+                # 改为交集：必须包含所有指定的福利标签
+                return all(welfare in welfare_list for welfare in welfare_prefs)
+            filtered_df = filtered_df[filtered_df['welfare_tags'].apply(has_all_welfare)]
         else:
             st.warning("⚠️ 数据中缺少福利标签信息，无法按福利筛选")
     
@@ -213,7 +387,9 @@ def filter_data(df, cities, education, duration, salary_range, required_skills, 
 
 
 def main():
-    st.title("📊 实习僧大数据开发岗位分析平台")
+    # 美化的主标题
+    st.markdown('<h1 class="main-title">📊 实习僧大数据开发岗位分析平台</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="subtitle">🎯 智能筛选 · 数据洞察 · 精准推荐</p>', unsafe_allow_html=True)
     st.markdown("---")
     
     DATA_PATH = "Big_data_development_results.csv"
@@ -251,43 +427,81 @@ def main():
         
         if all_welfare:
             st.sidebar.markdown("---")
-            st.sidebar.subheader("🎁 福利偏好（智能匹配）")
-            welfare_input = st.sidebar.text_area(
-                "输入福利关键词（每行一个或用空格分隔）",
-                placeholder="例如：\n转正\n五险一金\n双休\n\n或：转正 五险一金 双休",
-                help="输入多个关键词，每行一个或用空格分隔，系统会自动匹配所有相关福利",
-                height=100
+            st.sidebar.subheader("🎁 福利偏好（交集匹配）")
+            st.sidebar.caption("💡 输入多个关键词时，将筛选同时满足所有条件的岗位")
+            
+            # 显示福利待遇示例
+            with st.sidebar.expander("📋 常见福利待遇示例", expanded=False):
+                st.write("**转正类：** 转正、留用、可转正实习")
+                st.write("**保险类：** 五险一金、五险、社保")
+                st.write("**休假类：** 周末双休、带薪年假、弹性工作")
+                st.write("**补贴类：** 餐补、房补、交通补助")
+                st.write("**福利类：** 下午茶、零食水果、健身房")
+                st.write("**其他：** 节日福利、年终奖、团建活动")
+            
+            # 使用多个单行输入框，更适合手机
+            welfare_input_1 = st.sidebar.text_input(
+                "福利关键词 1",
+                placeholder="例如：转正",
+                key="welfare_1",
+                help="输入第一个必须满足的福利关键词"
+            )
+            welfare_input_2 = st.sidebar.text_input(
+                "福利关键词 2（可选）",
+                placeholder="例如：五险一金",
+                key="welfare_2",
+                help="输入第二个必须满足的福利关键词（可选）"
+            )
+            welfare_input_3 = st.sidebar.text_input(
+                "福利关键词 3（可选）",
+                placeholder="例如：双休",
+                key="welfare_3",
+                help="输入第三个必须满足的福利关键词（可选）"
             )
             
-            # 智能匹配福利标签
-            if welfare_input:
-                # 支持换行符和空格分隔
-                welfare_keywords = []
-                for line in welfare_input.split('\n'):
-                    for kw in line.split():
+            # 收集所有输入的关键词，分组处理（每个输入框是一组）
+            welfare_groups = []
+            for inp in [welfare_input_1, welfare_input_2, welfare_input_3]:
+                if inp:
+                    group_keywords = []
+                    # 支持空格分隔多个关键词（同一组内是OR关系）
+                    for kw in inp.split():
                         kw = kw.strip()
                         if kw:
-                            welfare_keywords.append(kw)
+                            group_keywords.append(kw)
+                    if group_keywords:
+                        welfare_groups.append(group_keywords)
+            
+            # 智能匹配福利标签（交集）
+            if welfare_groups:
+                # 为每组关键词匹配福利标签
+                matched_groups = []
+                for group in welfare_groups:
+                    group_matches = []
+                    for keyword in group:
+                        for welfare in all_welfare:
+                            if keyword.lower() in welfare.lower() or welfare.lower() in keyword.lower():
+                                if welfare not in group_matches:
+                                    group_matches.append(welfare)
+                    matched_groups.append(group_matches)
                 
-                # 去重
-                welfare_keywords = list(set(welfare_keywords))
+                # 显示每组的匹配结果
+                all_matched = []
+                for i, matches in enumerate(matched_groups):
+                    all_matched.extend(matches)
+                    st.sidebar.info(f"关键词 {i+1} 匹配: {', '.join(matches) if matches else '无'}")
                 
-                for keyword in welfare_keywords:
-                    for welfare in all_welfare:
-                        if keyword.lower() in welfare.lower() or welfare.lower() in keyword.lower():
-                            if welfare not in selected_welfare:
-                                selected_welfare.append(welfare)
+                # 将所有匹配的福利添加到selected_welfare（用于交集筛选）
+                selected_welfare = list(set(all_matched))
                 
-                # 显示匹配结果
                 if selected_welfare:
-                    st.sidebar.success(f"✅ 匹配到 {len(selected_welfare)} 个福利标签")
-                    st.sidebar.write("**匹配结果：**")
-                    for welfare in selected_welfare:
-                        st.sidebar.write(f"• {welfare}")
+                    st.sidebar.success(f"✅ 共匹配到 {len(selected_welfare)} 个福利标签")
+                    st.sidebar.warning("⚠️ 筛选模式：必须同时满足所有输入的关键词")
                 else:
-                    st.sidebar.warning("⚠️ 未匹配到相关福利，请尝试其他关键词")
-                    if all_welfare:
-                        st.sidebar.info(f"💡 可用福利示例：{', '.join(all_welfare[:8])}...")
+                    st.sidebar.warning("⚠️ 未匹配到相关福利")
+                    with st.sidebar.expander("💡 可用福利示例"):
+                        for welfare in all_welfare[:10]:
+                            st.write(f"• {welfare}")
         else:
             st.sidebar.info("ℹ️ 当前数据中没有福利标签信息")
     else:
@@ -340,8 +554,9 @@ def main():
         st.markdown('\n'.join(filter_info))
         return
     
-    # KPI 指标卡（有数据时）
-    st.header("📈 核心指标")
+    # KPI 指标卡（有数据时）- 美化版
+    st.markdown("### 📈 核心指标")
+    st.markdown("")  # 添加间距
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
@@ -373,14 +588,27 @@ def main():
         with col1:
             fig_box = go.Figure()
             fig_box.add_trace(go.Box(y=filtered_df['avg_salary'], name='日薪分布', 
-                                     marker_color='lightseagreen', boxmean='sd'))
-            fig_box.update_layout(title="薪资箱线图", yaxis_title="日薪（元/天）", height=400)
+                                     marker_color='#667eea', boxmean='sd',
+                                     line=dict(color='#764ba2', width=2)))
+            fig_box.update_layout(
+                title=dict(text="薪资箱线图", font=dict(size=18, color='#2c3e50')),
+                yaxis_title="日薪（元/天）", 
+                height=400,
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)'
+            )
             st.plotly_chart(fig_box, use_container_width=True)
         
         with col2:
             fig_hist = px.histogram(filtered_df, x='avg_salary', nbins=30, title="薪资分布直方图",
-                                   labels={'avg_salary': '日薪（元/天）'})
-            fig_hist.update_layout(height=400)
+                                   labels={'avg_salary': '日薪（元/天）'},
+                                   color_discrete_sequence=['#667eea'])
+            fig_hist.update_layout(
+                height=400,
+                title=dict(font=dict(size=18, color='#2c3e50')),
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)'
+            )
             st.plotly_chart(fig_hist, use_container_width=True)
         
         st.markdown("---")
@@ -394,14 +622,26 @@ def main():
         
         with col1:
             fig_city_count = px.bar(city_stats, x='城市', y='岗位数量', title="各城市岗位数量 TOP20",
-                                    color='岗位数量', color_continuous_scale='Blues')
-            fig_city_count.update_layout(height=400)
+                                    color='岗位数量', 
+                                    color_continuous_scale=[[0, '#667eea'], [1, '#764ba2']])
+            fig_city_count.update_layout(
+                height=400,
+                title=dict(font=dict(size=18, color='#2c3e50')),
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)'
+            )
             st.plotly_chart(fig_city_count, use_container_width=True)
         
         with col2:
             fig_city_salary = px.bar(city_stats, x='城市', y='平均薪资', title="各城市平均薪资 TOP20",
-                                     color='平均薪资', color_continuous_scale='Reds')
-            fig_city_salary.update_layout(height=400)
+                                     color='平均薪资', 
+                                     color_continuous_scale=[[0, '#f093fb'], [1, '#f5576c']])
+            fig_city_salary.update_layout(
+                height=400,
+                title=dict(font=dict(size=18, color='#2c3e50')),
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)'
+            )
             st.plotly_chart(fig_city_salary, use_container_width=True)
     
     # ==================== 第2页：技能与学历分析 ====================
