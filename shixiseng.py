@@ -229,7 +229,7 @@ def main():
     selected_education = st.sidebar.selectbox("学历要求", options=education_options, index=0)
     
     duration_options = ['全部'] + sorted(df['实习时长'].dropna().unique().tolist())
-    selected_duration = st.sidebar.selectbox("实习时长", options=duration_options, index=0)
+    selected_duration = st.sidebar.selectbox("最短实习时长", options=duration_options, index=0)
     
     min_salary = int(df['avg_salary'].min())
     max_salary = int(df['avg_salary'].max())
@@ -239,7 +239,7 @@ def main():
     all_skills = sorted(list(set([skill for skills in df['matched_skills'] for skill in skills])))
     selected_skills = st.sidebar.multiselect("必备技能", options=all_skills, default=[])
     
-    # 福利偏好 - 文字输入智能匹配
+    # 福利偏好 - 文字输入智能匹配（支持多关键词）
     selected_welfare = []
     
     # 检查是否有福利标签数据
@@ -252,15 +252,26 @@ def main():
         if all_welfare:
             st.sidebar.markdown("---")
             st.sidebar.subheader("🎁 福利偏好（智能匹配）")
-            welfare_input = st.sidebar.text_input(
-                "输入福利关键词",
-                placeholder="例如：转正、餐补、双休...",
-                help="输入关键词，系统会自动匹配相关福利"
+            welfare_input = st.sidebar.text_area(
+                "输入福利关键词（每行一个或用空格分隔）",
+                placeholder="例如：\n转正\n五险一金\n双休\n\n或：转正 五险一金 双休",
+                help="输入多个关键词，每行一个或用空格分隔，系统会自动匹配所有相关福利",
+                height=100
             )
             
             # 智能匹配福利标签
             if welfare_input:
-                welfare_keywords = [kw.strip() for kw in welfare_input.split() if kw.strip()]
+                # 支持换行符和空格分隔
+                welfare_keywords = []
+                for line in welfare_input.split('\n'):
+                    for kw in line.split():
+                        kw = kw.strip()
+                        if kw:
+                            welfare_keywords.append(kw)
+                
+                # 去重
+                welfare_keywords = list(set(welfare_keywords))
+                
                 for keyword in welfare_keywords:
                     for welfare in all_welfare:
                         if keyword.lower() in welfare.lower() or welfare.lower() in keyword.lower():
@@ -270,13 +281,13 @@ def main():
                 # 显示匹配结果
                 if selected_welfare:
                     st.sidebar.success(f"✅ 匹配到 {len(selected_welfare)} 个福利标签")
-                    st.sidebar.write("匹配结果：")
+                    st.sidebar.write("**匹配结果：**")
                     for welfare in selected_welfare:
                         st.sidebar.write(f"• {welfare}")
                 else:
                     st.sidebar.warning("⚠️ 未匹配到相关福利，请尝试其他关键词")
                     if all_welfare:
-                        st.sidebar.info(f"💡 可用福利：{', '.join(all_welfare[:5])}...")
+                        st.sidebar.info(f"💡 可用福利示例：{', '.join(all_welfare[:8])}...")
         else:
             st.sidebar.info("ℹ️ 当前数据中没有福利标签信息")
     else:
