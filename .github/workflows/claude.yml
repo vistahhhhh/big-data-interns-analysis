@@ -35,8 +35,8 @@ jobs:
         uses: anthropics/claude-code-action@v1
         env:
           # ANTHROPIC_BASE_URL: https://api.moonshot.cn/anthropic
-          ANTHROPIC_BASE_URL: sk-861aba061e944aac96447e4f89aeb749
+          ANTHROPIC_BASE_URL: https://open.bigmodel.cn/api/anthropic
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          anthropic_api_key: ${{ secrets.glm4_5 }}
           claude_args: |
             --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh issue:*),Bash(gh search:*),Bash(gh label:*)"
