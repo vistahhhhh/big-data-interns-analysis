@@ -37,7 +37,7 @@ jobs:
           # ANTHROPIC_BASE_URL: https://api.moonshot.cn/anthropic
           ANTHROPIC_BASE_URL: https://open.bigmodel.cn/api/anthropic
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          anthropic_api_key: ${{ secrets.glm4_5 }}
           track_progress: true
           prompt: |
             REPO: ${{ github.repository }}
